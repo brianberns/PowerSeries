@@ -54,9 +54,6 @@ module PowerSeries =
         let rec value = GenericOne<'T> :: lazy zero
         value
 
-    let ofInt n =
-        n :: lazy zero<int>
-
     let inline ofList<'T
             when ^T : (static member Zero : ^T)
             and ^T : (static member One : ^T)
@@ -75,6 +72,11 @@ module PowerSeries =
         let rec value = GenericZero<'T> :: lazy (GenericOne<'T> :: lazy zero)
         value
 
+    let inline negate series =
+        let rec loop = function
+            | f :: fs -> -f :: lazy (loop fs.Value)
+        series |> loop
+
     let inline scale (c : 'T) series =
         let rec loop (f :: fs) =
             c * f :: lazy (fs.Value |> loop)
@@ -85,9 +87,21 @@ module PowerSeries =
             (f + g) :: lazy (loop fs.Value gs.Value)
         loop seriesA seriesB
 
+    let inline sub seriesA seriesB =
+        add seriesA (negate seriesB)
+
     let inline mult seriesA seriesB =
         let rec loop (f : 'T :: fs) (g : 'T :: gs) =
             f * g :: lazy (add (scale f gs.Value) (loop fs.Value (g :: gs)))
+        loop seriesA seriesB
+
+    let inline div seriesA seriesB =
+        let rec loop (f : 'T :: fs) (g : 'T :: gs) =
+            if f = GenericZero<'T> && g = GenericZero<'T> then
+                loop fs.Value gs.Value
+            else
+                let q = f / g
+                q :: lazy (loop (sub fs.Value (scale q gs.Value)) (g :: gs))
         loop seriesA seriesB
 
     let inline pow n series =
@@ -109,14 +123,32 @@ type PowerSeries<'T
     static member inline Zero =
         PowerSeries.zero<'T>
 
-    static member inline (.*)(c, series) =
-        PowerSeries.scale c series
+    static member inline One =
+        PowerSeries.one<'T>
+
+    static member inline (~-) series =
+        PowerSeries.negate series
 
     static member inline (+)(seriesA, seriesB) =
         PowerSeries.add seriesA seriesB
 
+    static member inline (-)(seriesA, seriesB) =
+        PowerSeries.sub seriesA seriesB
+
+    static member inline (.*)(c, series) =
+        PowerSeries.scale c series
+
     static member inline (*)(seriesA, seriesB) =
         PowerSeries.mult seriesA seriesB
 
+    static member inline (/)(seriesA, seriesB) =
+        PowerSeries.div seriesA seriesB
+
     static member inline Pow(series, n) =
         PowerSeries.pow n series
+
+module NumericLiteralG =
+    let FromZero () = PowerSeries.zero<int>
+    let FromOne () = PowerSeries.one<int>
+    let FromInt32 (n : int) = PowerSeries.ofList [n]
+    let FromInt64 (n : int64) = PowerSeries.ofList [n]

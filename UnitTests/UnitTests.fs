@@ -7,7 +7,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 type UnitTest() =
 
     [<TestMethod>]
-    member __.Test1() =
+    member __.Types() =
 
         let coeff = [1; 0; -2]
         let expected = [1; 0; -6; 0; 12; 0; -8; 0; 0; 0]
@@ -34,4 +34,19 @@ type UnitTest() =
         let series = series ** 3
         Assert.AreEqual(
             expected |> List.map cast,
+            series |> PowerSeries.take 10)
+
+    [<TestMethod>]
+    member __.Expression() =
+
+        let x = PowerSeries.x
+
+        let series = (1G - (2G * (x * x))) ** 3
+        Assert.AreEqual(
+            [1; 0; -6; 0; 12; 0; -8; 0; 0; 0],
+            series |> PowerSeries.take 10)
+
+        let series = 1G / (1G - x)
+        Assert.AreEqual(
+            [1; 1; 1; 1; 1; 1; 1; 1; 1; 1],
             series |> PowerSeries.take 10)
