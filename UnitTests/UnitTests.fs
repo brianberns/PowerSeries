@@ -104,3 +104,13 @@ type UnitTest() =
     member __.Trig() =
         printfn "%A" (PowerSeries.sin |> PowerSeries.take 30)
         printfn "%A" (PowerSeries.cos |> PowerSeries.take 30)
+
+    /// https://www.emathzone.com/tutorials/calculus/maclaurin-series-of-sqrt1x.html
+    [<TestMethod>]
+    member __.Sqrt() =
+        let x = PowerSeries<BigRational>.X
+        Assert.AreEqual(
+            [1N; 1N/2N; -1N/8N; 1N/16N],
+            (1Z + x)
+                |> PowerSeries.sqrt
+                |> PowerSeries.take 30)

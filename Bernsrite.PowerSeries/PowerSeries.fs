@@ -19,7 +19,10 @@ type PowerSeries<'T
         when ^T : (static member Zero : ^T)
         and ^T : (static member One : ^T)
         and ^T : (static member (+) : ^T * ^T -> ^T)
-        and ^T : (static member (*) : ^T * ^T -> ^T)> =
+        and ^T : (static member (*) : ^T * ^T -> ^T)
+        and ^T : (static member (/) : ^T * ^T -> ^T)
+        and ^T : (static member (~-) : ^T -> ^T)
+        and ^T : equality> =
     | (::) of ('T * Lazy<PowerSeries<'T>>)
 
 module internal Internal =
@@ -29,7 +32,10 @@ module internal Internal =
             when ^T : (static member Zero : ^T)
             and ^T : (static member One : ^T)
             and ^T : (static member (+) : ^T * ^T -> ^T)
-            and ^T : (static member (*) : ^T * ^T -> ^T)> =
+            and ^T : (static member (*) : ^T * ^T -> ^T)
+            and ^T : (static member (/) : ^T * ^T -> ^T)
+            and ^T : (static member (~-) : ^T -> ^T)
+            and ^T : equality> =
         let rec value =  GenericZero<'T> :: lazy value
         value
 
@@ -38,7 +44,10 @@ module internal Internal =
                 when ^T : (static member Zero : ^T)
                 and ^T : (static member One : ^T)
                 and ^T : (static member (+) : ^T * ^T -> ^T)
-                and ^T : (static member (*) : ^T * ^T -> ^T)> (c : 'T) =
+                and ^T : (static member (*) : ^T * ^T -> ^T)
+                and ^T : (static member (/) : ^T * ^T -> ^T)
+                and ^T : (static member (~-) : ^T -> ^T)
+                and ^T : equality> (c : 'T) =
         c :: lazy zero
 
     /// Power series for 1.
@@ -46,7 +55,10 @@ module internal Internal =
             when ^T : (static member Zero : ^T)
             and ^T : (static member One : ^T)
             and ^T : (static member (+) : ^T * ^T -> ^T)
-            and ^T : (static member (*) : ^T * ^T -> ^T)> =
+            and ^T : (static member (*) : ^T * ^T -> ^T)
+            and ^T : (static member (/) : ^T * ^T -> ^T)
+            and ^T : (static member (~-) : ^T -> ^T)
+            and ^T : equality> =
         constant GenericOne<'T>
 
     /// 0 + 1*x
@@ -54,7 +66,10 @@ module internal Internal =
             when ^T : (static member Zero : ^T)
             and ^T : (static member One : ^T)
             and ^T : (static member (+) : ^T * ^T -> ^T)
-            and ^T : (static member (*) : ^T * ^T -> ^T)> =
+            and ^T : (static member (*) : ^T * ^T -> ^T)
+            and ^T : (static member (/) : ^T * ^T -> ^T)
+            and ^T : (static member (~-) : ^T -> ^T)
+            and ^T : equality> =
         GenericZero<'T> :: lazy (GenericOne<'T> :: lazy zero)
 
     /// Constructs a power series from the given coeffecients.
@@ -62,7 +77,10 @@ module internal Internal =
             when ^T : (static member Zero : ^T)
             and ^T : (static member One : ^T)
             and ^T : (static member (+) : ^T * ^T -> ^T)
-            and ^T : (static member (*) : ^T * ^T -> ^T)> (ns : List<'T>) =
+            and ^T : (static member (*) : ^T * ^T -> ^T)
+            and ^T : (static member (/) : ^T * ^T -> ^T)
+            and ^T : (static member (~-) : ^T -> ^T)
+            and ^T : equality> (ns : List<'T>) =
         let rec loop = function
             | List.Nil -> zero
             | List.Cons (head, tail) -> head :: lazy (loop tail)
@@ -115,7 +133,7 @@ module internal Internal =
                     series
                         |> loop (n - 1)
                         |> mult series
-                | _ -> raise <| NotSupportedException()
+                | _ -> failwith "Negative exponents not supported"
         series |> loop n
 
 /// Power series extensions.
@@ -123,7 +141,10 @@ type PowerSeries<'T
         when ^T : (static member Zero : ^T)
         and ^T : (static member One : ^T)
         and ^T : (static member (+) : ^T * ^T -> ^T)
-        and ^T : (static member (*) : ^T * ^T -> ^T)> with
+        and ^T : (static member (*) : ^T * ^T -> ^T)
+        and ^T : (static member (/) : ^T * ^T -> ^T)
+        and ^T : (static member (~-) : ^T -> ^T)
+        and ^T : equality> with
 
     /// Power series for 0.
     static member inline Zero =
@@ -185,7 +206,10 @@ module PowerSeries =
             when ^T : (static member Zero : ^T)
             and ^T : (static member One : ^T)
             and ^T : (static member (+) : ^T * ^T -> ^T)
-            and ^T : (static member (*) : ^T * ^T -> ^T)> n series =
+            and ^T : (static member (*) : ^T * ^T -> ^T)
+            and ^T : (static member (/) : ^T * ^T -> ^T)
+            and ^T : (static member (~-) : ^T -> ^T)
+            and ^T : equality> n series =
         let rec loop n (f : 'T :: fs) =
             if n <= 0 then
                 []
@@ -253,8 +277,44 @@ module PowerSeries =
             lazy (PowerSeries<BigRational>.One - (lazyIntegral lazySin))
         lazySin.Value, lazyCos.Value
 
+    /// Answers the square root of the given series.
+    let inline sqrt<'T
+            when ^T : (static member Zero : ^T)
+            and ^T : (static member One : ^T)
+            and ^T : (static member (+) : ^T * ^T -> ^T)
+            and ^T : (static member (*) : ^T * ^T -> ^T)
+            and ^T : (static member (/) : ^T * ^T -> ^T)
+            and ^T : (static member (~-) : ^T -> ^T)
+            and ^T : equality> series =
+        let fail () = failwith "Can't compute square root"
+        let rec loop (f : 'T :: fs) =
+            if f = GenericZero<'T> then
+                let (f :: fs) = fs.Value
+                if f = GenericZero<'T> then
+                    f :: lazy (loop fs.Value)
+                else fail ()
+            elif f = GenericOne<'T> then
+                let rec lazyQs : Lazy<PowerSeries<'T>> =
+                    let lazyDiv =
+                        let num = deriv (GenericOne<'T> :: fs)
+                        let lazyDen =
+                            lazy (lazyQs.Value + lazyQs.Value)
+                        lazy (num / lazyDen.Value)
+                    lazy (PowerSeries<'T>.One + lazyIntegral lazyDiv)
+                lazyQs.Value
+            else fail ()
+        series |> loop
+
 module NumericLiteralG =
     let FromZero () = Internal.zero<int>
     let FromOne () = Internal.one<int>
     let FromInt32 (n : int) = Internal.constant n
     let FromInt64 (n : int64) = Internal.constant n
+
+module NumericLiteralZ =
+    let FromZero () = Internal.zero<BigRational>
+    let FromOne () = Internal.one<BigRational>
+    let FromInt32 (n : int) =
+        n
+            |> BigRational.FromInt
+            |> Internal.constant
