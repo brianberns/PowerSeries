@@ -10,8 +10,6 @@ open MathNet.Numerics
 [<TestClass>]
 type UnitTest() =
 
-    let x = PowerSeries.X
-
     [<TestMethod>]
     member __.Types() =
 
@@ -61,6 +59,7 @@ type UnitTest() =
     [<TestMethod>]
     member __.Expression() =
 
+        let x = PowerSeries<int>.X
         let series = (1 - (2 * (x ** 2))) ** 3
         printfn "%A" <| PowerSeries.toString series
         Assert.AreEqual(
@@ -79,7 +78,8 @@ type UnitTest() =
 
     [<TestMethod>]
     member __.Calculus() =
-
+ 
+        let x = PowerSeries<int>.X
         let series = x * x |> PowerSeries.deriv
         Assert.AreEqual(
             [0; 2; 0],
@@ -103,8 +103,21 @@ type UnitTest() =
 
     [<TestMethod>]
     member __.Trig() =
-        printfn "%A" (PowerSeries.sin |> PowerSeries.take 30)
-        printfn "%A" (PowerSeries.cos |> PowerSeries.take 30)
+
+        let test seriesA seriesB =
+            let take = PowerSeries.take 3
+            Assert.AreEqual(
+                take seriesA,
+                take seriesB)
+
+        test
+            PowerSeries.sin
+            (PowerSeries.sqrt (1N - PowerSeries.cos ** 2))
+
+        let x = PowerSeries<BigRational>.X
+        test
+            PowerSeries.tan
+            (PowerSeries.revert (PowerSeries.integral (1N / (1N + x ** 2))))
 
     /// https://www.emathzone.com/tutorials/calculus/maclaurin-series-of-sqrt1x.html
     [<TestMethod>]

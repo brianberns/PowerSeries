@@ -204,15 +204,6 @@ module PowerSeries =
     let inline ofList ns =
         Internal.ofList ns
 
-    /// Display string.
-    let inline toString series =
-        let rec loop level = function
-            | f :: _ when level = 0 ->
-                sprintf "%A, ..." f
-            | f :: fs ->
-                sprintf "%A, %s" f (fs.Value |> loop (level - 1))
-        series |> loop 3
-
     /// Takes a finite number of coeffecients from the given power series.
     let inline take<'T
             when ^T : (static member Zero : ^T)
@@ -228,6 +219,12 @@ module PowerSeries =
             else
                 List.Cons(f, fs.Value |> loop (n-1))
         loop n series
+
+    /// Display string.
+    let inline toString series =
+        series
+            |> take 3
+            |> sprintf "%A, ..."
 
     /// Composes two power series: F(G).
     let inline compose seriesF seriesG =
@@ -288,6 +285,9 @@ module PowerSeries =
         and lazyCos =
             lazy (PowerSeries<BigRational>.One - (lazyIntegral lazySin))
         lazySin.Value, lazyCos.Value
+
+    /// Tangent function.
+    let tan = sin / cos
 
     /// Answers the square root of the given series.
     let inline sqrt<'T
