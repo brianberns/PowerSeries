@@ -81,30 +81,30 @@ module PowerSeries =
 
     let inline scale (c : 'T) series =
         let rec loop (f :: fs) =
-            c * f :: lazy (fs.Value |> loop)
+            (c * f) :: lazy (fs.Value |> loop)
         series |> loop
 
-    let inline add seriesA seriesB =
+    let inline add seriesF seriesG =
         let rec loop (f : 'T :: fs) (g : 'T :: gs) =
             (f + g) :: lazy (loop fs.Value gs.Value)
-        loop seriesA seriesB
+        loop seriesF seriesG
 
-    let inline sub seriesA seriesB =
-        add seriesA (negate seriesB)
+    let inline sub seriesF seriesG =
+        add seriesF (negate seriesG)
 
-    let inline mult seriesA seriesB =
+    let inline mult seriesF seriesG =
         let rec loop (f : 'T :: fs) (g : 'T :: gs) =
-            f * g :: lazy (add (scale f gs.Value) (loop fs.Value (g :: gs)))
-        loop seriesA seriesB
+            (f * g) :: lazy (add (scale f gs.Value) (loop fs.Value (g :: gs)))
+        loop seriesF seriesG
 
-    let inline div seriesA seriesB =
+    let inline div seriesF seriesG =
         let rec loop (f : 'T :: fs) (g : 'T :: gs) =
             if f = GenericZero<'T> && g = GenericZero<'T> then
                 loop fs.Value gs.Value
             else
                 let q = f / g
                 q :: lazy (loop (sub fs.Value (scale q gs.Value)) (g :: gs))
-        loop seriesA seriesB
+        loop seriesF seriesG
 
     let inline pow n series =
         let rec loop n series =
@@ -116,6 +116,34 @@ module PowerSeries =
                         |> mult series
                 | _ -> raise <| NotSupportedException()
         series |> loop n
+
+    let inline compose seriesF seriesG =
+        let rec loop (f : 'T :: fs) (g : 'T :: gs) =
+            if g = GenericZero<'T> then
+                f :: lazy (mult gs.Value (loop fs.Value (g :: gs)))
+            else
+                raise <| NotSupportedException()
+        loop seriesF seriesG
+    
+    let inline revert series =
+        let rec loop (f : 'T :: fs) =
+            if f = GenericZero<'T> then
+                let rec rs =
+                    GenericZero<'T> :: lazy (div one (compose fs.Value rs))
+                rs
+            else
+                raise <| NotSupportedException()
+        loop series
+
+    let inline deriv (_ :: fs) =
+        let rec deriv1 (g : 'T :: gs) n =
+            (n * g) :: lazy (deriv1 gs.Value (n + GenericOne<'T>))
+        deriv1 fs.Value GenericOne<'T>
+
+    let inline integral fs =
+        let rec int1 (g : 'T :: gs) n : PowerSeries<'T> =
+            (g / n) :: lazy (int1 gs.Value (n + GenericOne<'T>))
+        GenericZero<'T> :: lazy (int1 fs GenericOne<'T>)
 
 type PowerSeries<'T
         when ^T : (static member Zero : ^T)
@@ -132,20 +160,20 @@ type PowerSeries<'T
     static member inline (~-) series =
         PowerSeries.negate series
 
-    static member inline (+)(seriesA, seriesB) =
-        PowerSeries.add seriesA seriesB
+    static member inline (+)(seriesF, seriesG) =
+        PowerSeries.add seriesF seriesG
 
-    static member inline (-)(seriesA, seriesB) =
-        PowerSeries.sub seriesA seriesB
+    static member inline (-)(seriesF, seriesG) =
+        PowerSeries.sub seriesF seriesG
 
     static member inline (.*)(c, series) =
         PowerSeries.scale c series
 
-    static member inline (*)(seriesA, seriesB) =
-        PowerSeries.mult seriesA seriesB
+    static member inline (*)(seriesF, seriesG) =
+        PowerSeries.mult seriesF seriesG
 
-    static member inline (/)(seriesA, seriesB) =
-        PowerSeries.div seriesA seriesB
+    static member inline (/)(seriesF, seriesG) =
+        PowerSeries.div seriesF seriesG
 
     static member inline Pow(series, n) =
         PowerSeries.pow n series
