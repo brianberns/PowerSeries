@@ -50,3 +50,8 @@ type UnitTest() =
         Assert.AreEqual(
             [1; 1; 1; 1; 1; 1; 1; 1; 1; 1],
             series |> PowerSeries.take 10)
+
+        let series = 1G / (1G - x) ** 2
+        Assert.AreEqual(
+            [1; 2; 3; 4; 5; 6; 7; 8; 9; 10],
+            series |> PowerSeries.take 10)

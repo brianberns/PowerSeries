@@ -16,6 +16,8 @@ type PowerSeries<'T
         and ^T : (static member (*) : ^T * ^T -> ^T)> =
     | (::) of ('T * Lazy<PowerSeries<'T>>)
 
+/// Inspired by "Power Series, Power Serious" by M. Douglas McIlroy
+/// http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.333.3156&rep=rep1&type=pdf
 module PowerSeries =
 
     let inline toString series =
@@ -109,8 +111,9 @@ module PowerSeries =
             match n with
                 | 0 -> one
                 | n when n > 0 ->
-                    let right = series |> loop (n - 1)
-                    mult series right
+                    series
+                        |> loop (n - 1)
+                        |> mult series
                 | _ -> raise <| NotSupportedException()
         series |> loop n
 
