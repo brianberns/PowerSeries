@@ -105,7 +105,7 @@ type UnitTest() =
     member __.Trig() =
 
         let test seriesA seriesB =
-            let take = PowerSeries.take 3
+            let take = PowerSeries.take 30
             Assert.AreEqual(
                 take seriesA,
                 take seriesB)
