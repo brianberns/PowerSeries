@@ -12,4 +12,9 @@
     <Compile Include="PowerSeries.fs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MathNet.Numerics" Version="4.8.0" />
+    <PackageReference Include="MathNet.Numerics.FSharp" Version="4.8.0" />
+  </ItemGroup>
+
 </Project>

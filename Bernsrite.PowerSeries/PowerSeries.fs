@@ -2,6 +2,7 @@ namespace Bernsrite.PowerSeries
 
 open System
 open Microsoft.FSharp.Core.LanguagePrimitives
+open MathNet.Numerics
 
 module List =
 
@@ -140,10 +141,25 @@ module PowerSeries =
             (n * g) :: lazy (deriv1 gs.Value (n + GenericOne<'T>))
         deriv1 fs.Value GenericOne<'T>
 
-    let inline integral fs =
+    let inline private lazyIntegral (fs : Lazy<_>) =
         let rec int1 (g : 'T :: gs) n : PowerSeries<'T> =
             (g / n) :: lazy (int1 gs.Value (n + GenericOne<'T>))
-        GenericZero<'T> :: lazy (int1 fs GenericOne<'T>)
+        GenericZero<'T> :: lazy (int1 fs.Value GenericOne<'T>)
+
+    let inline integral series =
+        lazyIntegral (lazy series)
+
+    let exp =
+        let rec lazyExp =
+            lazy (add one<BigRational> (lazyIntegral lazyExp))
+        lazyExp.Value
+
+    let sin, cos =
+        let rec lazySin =
+            lazy (lazyIntegral lazyCos)
+        and lazyCos =
+            lazy (sub one<BigRational> (lazyIntegral lazySin))
+        lazySin.Value, lazyCos.Value
 
 type PowerSeries<'T
         when ^T : (static member Zero : ^T)

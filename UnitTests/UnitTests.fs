@@ -2,6 +2,7 @@
 
 open System.Numerics
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open MathNet.Numerics
 
 [<TestClass>]
 type UnitTest() =
@@ -31,6 +32,22 @@ type UnitTest() =
             series |> PowerSeries.take 10)
 
         let cast (x : int) = BigInteger(x)
+        let series =
+            coeff |> List.map cast |> PowerSeries.ofList
+        let series = series ** 3
+        Assert.AreEqual(
+            expected |> List.map cast,
+            series |> PowerSeries.take 10)
+
+        let cast = decimal
+        let series =
+            coeff |> List.map cast |> PowerSeries.ofList
+        let series = series ** 3
+        Assert.AreEqual(
+            expected |> List.map cast,
+            series |> PowerSeries.take 10)
+
+        let cast = BigRational.FromInt
         let series =
             coeff |> List.map cast |> PowerSeries.ofList
         let series = series ** 3
@@ -68,3 +85,14 @@ type UnitTest() =
         Assert.AreEqual(
             [0; 0; 1],
             series |> PowerSeries.take 3)
+
+    [<TestMethod>]
+    member __.Exp() =
+        Assert.AreEqual(
+            [1N; 1N; 1N/2N; 1N/6N; 1N/24N; 1N/120N; 1N/720N],
+            PowerSeries.exp |> PowerSeries.take 7)
+
+    [<TestMethod>]
+    member __.Trig() =
+        printfn "%A" (PowerSeries.sin |> PowerSeries.take 30)
+        printfn "%A" (PowerSeries.cos |> PowerSeries.take 30)
