@@ -61,17 +61,18 @@ type UnitTest() =
     [<TestMethod>]
     member __.Expression() =
 
-        let series = (1G - (2G * (x * x))) ** 3
+        let series = (1 - (2 * (x ** 2))) ** 3
+        printfn "%A" <| PowerSeries.toString series
         Assert.AreEqual(
             [1; 0; -6; 0; 12; 0; -8; 0; 0; 0],
             series |> PowerSeries.take 10)
 
-        let series = 1G / (1G - x)
+        let series = 1 / (1 - x)
         Assert.AreEqual(
             [1; 1; 1; 1; 1; 1; 1; 1; 1; 1],
             series |> PowerSeries.take 10)
 
-        let series = 1G / (1G - x) ** 2
+        let series = 1 / (1 - x) ** 2
         Assert.AreEqual(
             [1; 2; 3; 4; 5; 6; 7; 8; 9; 10],
             series |> PowerSeries.take 10)
@@ -109,8 +110,9 @@ type UnitTest() =
     [<TestMethod>]
     member __.Sqrt() =
         let x = PowerSeries<BigRational>.X
+        let expected = [1N; 1N/2N; -1N/8N; 1N/16N]
         Assert.AreEqual(
-            [1N; 1N/2N; -1N/8N; 1N/16N],
-            (1Z + x)
+            expected,
+            (1N + x)
                 |> PowerSeries.sqrt
-                |> PowerSeries.take 30)
+                |> PowerSeries.take expected.Length)

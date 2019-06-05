@@ -163,24 +163,36 @@ type PowerSeries<'T
         Internal.negate series
 
     /// Adds the given power series.
-    static member inline (+)(seriesF, seriesG) =
+    static member inline (+)(seriesF : PowerSeries<'T>, seriesG : PowerSeries<'T>) =
         Internal.add seriesF seriesG
 
-    /// Subtracts the given power series.
-    static member inline (-)(seriesF, seriesG) =
+    /// Adds the given constant value to the given power series.
+    static member inline (+)(value : 'T, series : PowerSeries<'T>) =
+        (Internal.constant value) + series
+
+    /// Subtracts the given power series from the given constant value.
+    static member inline (-)(seriesF : PowerSeries<'T>, seriesG : PowerSeries<'T>) =
         Internal.sub seriesF seriesG
 
-    /// Scales the given power series by a constant.
-    static member inline (.*)(c, series) =
-        Internal.scale c series
+    /// Subtracts the given power series from the given constant value.
+    static member inline (-)(value : 'T, series : PowerSeries<'T>) =
+        (Internal.constant value) - series
 
     /// Multiplies the given power series.
-    static member inline (*)(seriesF, seriesG) =
+    static member inline (*)(seriesF : PowerSeries<'T>, seriesG : PowerSeries<'T>) =
         Internal.mult seriesF seriesG
 
+    /// Multiplies the given power series by the given constant.
+    static member inline (*)(value : 'T, series : PowerSeries<'T>) =
+        (Internal.constant value) * series
+
     /// Divides the given power series.
-    static member inline (/)(seriesF, seriesG) =
+    static member inline (/)(seriesF : PowerSeries<'T>, seriesG : PowerSeries<'T>) =
         Internal.div seriesF seriesG
+
+    /// Divides the given constant by the given power series.
+    static member inline (/)(value : 'T, series : PowerSeries<'T>) =
+        (Internal.constant value) / series
 
     /// Raises the given power series to a power.
     static member inline Pow(series, n) =
@@ -260,7 +272,7 @@ module PowerSeries =
             if n <= 0 then
                 GenericZero<'T>
             else
-                f + (x .* fs.Value |> loop (n - 1))
+                f + (Internal.scale x fs.Value |> loop (n - 1))
         series |> loop n
 
     /// Exponential function.
@@ -304,17 +316,3 @@ module PowerSeries =
                 lazyQs.Value
             else fail ()
         series |> loop
-
-module NumericLiteralG =
-    let FromZero () = Internal.zero<int>
-    let FromOne () = Internal.one<int>
-    let FromInt32 (n : int) = Internal.constant n
-    let FromInt64 (n : int64) = Internal.constant n
-
-module NumericLiteralZ =
-    let FromZero () = Internal.zero<BigRational>
-    let FromOne () = Internal.one<BigRational>
-    let FromInt32 (n : int) =
-        n
-            |> BigRational.FromInt
-            |> Internal.constant
