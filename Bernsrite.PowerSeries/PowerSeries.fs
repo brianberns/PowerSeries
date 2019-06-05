@@ -9,7 +9,11 @@ module List =
         | [] -> Nil
         | head :: tail -> Cons(head, tail)
 
-type PowerSeries<'T when ^T : (static member Zero : ^T) and ^T : (static member One : ^T) and ^T : (static member (+) : ^T * ^T -> ^T) and ^T : (static member (*) : ^T * ^T -> ^T)> =
+type PowerSeries<'T
+        when ^T : (static member Zero : ^T)
+        and ^T : (static member One : ^T)
+        and ^T : (static member (+) : ^T * ^T -> ^T)
+        and ^T : (static member (*) : ^T * ^T -> ^T)> =
     | (::) of ('T * Lazy<PowerSeries<'T>>)
 
 module PowerSeries =
@@ -22,7 +26,11 @@ module PowerSeries =
                 sprintf "%A, %s" f (fs.Value |> loop (level - 1))
         series |> loop 3
 
-    let inline take<'T when ^T : (static member Zero : ^T) and ^T : (static member One : ^T) and ^T : (static member (+) : ^T * ^T -> ^T) and ^T : (static member (*) : ^T * ^T -> ^T)> n series =
+    let inline take<'T
+            when ^T : (static member Zero : ^T)
+            and ^T : (static member One : ^T)
+            and ^T : (static member (+) : ^T * ^T -> ^T)
+            and ^T : (static member (*) : ^T * ^T -> ^T)> n series =
         let rec loop n (f : 'T :: fs) =
             if n <= 0 then
                 []
@@ -30,24 +38,40 @@ module PowerSeries =
                 List.Cons(f, fs.Value |> loop (n-1))
         loop n series
 
-    let inline zero<'T when ^T : (static member Zero : ^T) and ^T : (static member One : ^T) and ^T : (static member (+) : ^T * ^T -> ^T) and ^T : (static member (*) : ^T * ^T -> ^T)> =
+    let inline zero<'T
+            when ^T : (static member Zero : ^T)
+            and ^T : (static member One : ^T)
+            and ^T : (static member (+) : ^T * ^T -> ^T)
+            and ^T : (static member (*) : ^T * ^T -> ^T)> =
         let rec value =  GenericZero<'T> :: lazy value
         value
 
-    let inline one<'T when ^T : (static member Zero : ^T) and ^T : (static member One : ^T) and ^T : (static member (+) : ^T * ^T -> ^T) and ^T : (static member (*) : ^T * ^T -> ^T)> =
+    let inline one<'T
+            when ^T : (static member Zero : ^T)
+            and ^T : (static member One : ^T)
+            and ^T : (static member (+) : ^T * ^T -> ^T)
+            and ^T : (static member (*) : ^T * ^T -> ^T)> =
         let rec value = GenericOne<'T> :: lazy zero
         value
 
     let ofInt n =
         n :: lazy zero<int>
 
-    let inline ofList<'T when ^T : (static member Zero : ^T) and ^T : (static member One : ^T) and ^T : (static member (+) : ^T * ^T -> ^T) and ^T : (static member (*) : ^T * ^T -> ^T)> (ns : List<'T>) =
+    let inline ofList<'T
+            when ^T : (static member Zero : ^T)
+            and ^T : (static member One : ^T)
+            and ^T : (static member (+) : ^T * ^T -> ^T)
+            and ^T : (static member (*) : ^T * ^T -> ^T)> (ns : List<'T>) =
         let rec loop = function
             | List.Nil -> zero
             | List.Cons (head, tail) -> head :: lazy (loop tail)
         ns |> loop
 
-    let inline x<'T when ^T : (static member Zero : ^T) and ^T : (static member One : ^T) and ^T : (static member (+) : ^T * ^T -> ^T) and ^T : (static member (*) : ^T * ^T -> ^T)> =
+    let inline x<'T
+            when ^T : (static member Zero : ^T)
+            and ^T : (static member One : ^T)
+            and ^T : (static member (+) : ^T * ^T -> ^T)
+            and ^T : (static member (*) : ^T * ^T -> ^T)> =
         let rec value = GenericZero<'T> :: lazy (GenericOne<'T> :: lazy zero)
         value
 
@@ -76,7 +100,11 @@ module PowerSeries =
                 | _ -> raise <| NotSupportedException()
         series |> loop n
 
-type PowerSeries<'T when ^T : (static member Zero : ^T) and ^T : (static member One : ^T) and ^T : (static member (+) : ^T * ^T -> ^T) and ^T : (static member (*) : ^T * ^T -> ^T)> with
+type PowerSeries<'T
+        when ^T : (static member Zero : ^T)
+        and ^T : (static member One : ^T)
+        and ^T : (static member (+) : ^T * ^T -> ^T)
+        and ^T : (static member (*) : ^T * ^T -> ^T)> with
 
     static member inline Zero =
         PowerSeries.zero<'T>
