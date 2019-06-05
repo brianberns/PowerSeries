@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28922.388
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Bernsrite.PowerSeries", "Bernsrite.PowerSeries\Bernsrite.PowerSeries.fsproj", "{485A13F4-CC60-4620-837C-0C647781F858}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnitTests", "UnitTests\UnitTests.fsproj", "{BE21BC4A-EDAD-491F-8984-988FF93B38E8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{485A13F4-CC60-4620-837C-0C647781F858}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{485A13F4-CC60-4620-837C-0C647781F858}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{485A13F4-CC60-4620-837C-0C647781F858}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{485A13F4-CC60-4620-837C-0C647781F858}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE21BC4A-EDAD-491F-8984-988FF93B38E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE21BC4A-EDAD-491F-8984-988FF93B38E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE21BC4A-EDAD-491F-8984-988FF93B38E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE21BC4A-EDAD-491F-8984-988FF93B38E8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C02BEC0D-A1D2-4C9B-87B6-946354095B04}
+	EndGlobalSection
+EndGlobal
