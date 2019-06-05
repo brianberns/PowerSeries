@@ -1,3 +1,5 @@
+/// Inspired by "Power Series, Power Serious" by M. Douglas McIlroy
+/// http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.333.3156&rep=rep1&type=pdf
 namespace Bernsrite.PowerSeries
 
 open System
@@ -6,10 +8,13 @@ open MathNet.Numerics
 
 module List =
 
+    /// Aliases for list constructors, so we can still access them after overriding their
+    /// usual names.
     let (|Cons|Nil|) = function
         | [] -> Nil
         | head :: tail -> Cons(head, tail)
 
+/// A power series: a0 + a1*x + a2*x^2 + a3*x^3 + ...
 type PowerSeries<'T
         when ^T : (static member Zero : ^T)
         and ^T : (static member One : ^T)
@@ -17,29 +22,7 @@ type PowerSeries<'T
         and ^T : (static member (*) : ^T * ^T -> ^T)> =
     | (::) of ('T * Lazy<PowerSeries<'T>>)
 
-/// Inspired by "Power Series, Power Serious" by M. Douglas McIlroy
-/// http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.333.3156&rep=rep1&type=pdf
-module PowerSeries =
-
-    let inline toString series =
-        let rec loop level = function
-            | f :: _ when level = 0 ->
-                sprintf "%A, ..." f
-            | f :: fs ->
-                sprintf "%A, %s" f (fs.Value |> loop (level - 1))
-        series |> loop 3
-
-    let inline take<'T
-            when ^T : (static member Zero : ^T)
-            and ^T : (static member One : ^T)
-            and ^T : (static member (+) : ^T * ^T -> ^T)
-            and ^T : (static member (*) : ^T * ^T -> ^T)> n series =
-        let rec loop n (f : 'T :: fs) =
-            if n <= 0 then
-                []
-            else
-                List.Cons(f, fs.Value |> loop (n-1))
-        loop n series
+module internal Internal =
 
     let inline zero<'T
             when ^T : (static member Zero : ^T)
@@ -49,13 +32,26 @@ module PowerSeries =
         let rec value =  GenericZero<'T> :: lazy value
         value
 
+    let inline constant<'T
+                when ^T : (static member Zero : ^T)
+                and ^T : (static member One : ^T)
+                and ^T : (static member (+) : ^T * ^T -> ^T)
+                and ^T : (static member (*) : ^T * ^T -> ^T)> (value : 'T) =
+        value :: lazy zero
+
     let inline one<'T
             when ^T : (static member Zero : ^T)
             and ^T : (static member One : ^T)
             and ^T : (static member (+) : ^T * ^T -> ^T)
             and ^T : (static member (*) : ^T * ^T -> ^T)> =
-        let rec value = GenericOne<'T> :: lazy zero
-        value
+        constant GenericOne<'T>
+
+    let inline x<'T
+            when ^T : (static member Zero : ^T)
+            and ^T : (static member One : ^T)
+            and ^T : (static member (+) : ^T * ^T -> ^T)
+            and ^T : (static member (*) : ^T * ^T -> ^T)> =
+        GenericZero<'T> :: lazy (GenericOne<'T> :: lazy zero)
 
     let inline ofList<'T
             when ^T : (static member Zero : ^T)
@@ -66,14 +62,6 @@ module PowerSeries =
             | List.Nil -> zero
             | List.Cons (head, tail) -> head :: lazy (loop tail)
         ns |> loop
-
-    let inline x<'T
-            when ^T : (static member Zero : ^T)
-            and ^T : (static member One : ^T)
-            and ^T : (static member (+) : ^T * ^T -> ^T)
-            and ^T : (static member (*) : ^T * ^T -> ^T)> =
-        let rec value = GenericZero<'T> :: lazy (GenericOne<'T> :: lazy zero)
-        value
 
     let inline negate series =
         let rec loop = function
@@ -118,10 +106,71 @@ module PowerSeries =
                 | _ -> raise <| NotSupportedException()
         series |> loop n
 
+type PowerSeries<'T
+        when ^T : (static member Zero : ^T)
+        and ^T : (static member One : ^T)
+        and ^T : (static member (+) : ^T * ^T -> ^T)
+        and ^T : (static member (*) : ^T * ^T -> ^T)> with
+
+    static member inline Zero =
+        Internal.zero<'T>
+
+    static member inline One =
+        Internal.one<'T>
+
+    static member inline X =
+        Internal.x<'T>
+
+    static member inline (~-) series =
+        Internal.negate series
+
+    static member inline (+)(seriesF, seriesG) =
+        Internal.add seriesF seriesG
+
+    static member inline (-)(seriesF, seriesG) =
+        Internal.sub seriesF seriesG
+
+    static member inline (.*)(c, series) =
+        Internal.scale c series
+
+    static member inline (*)(seriesF, seriesG) =
+        Internal.mult seriesF seriesG
+
+    static member inline (/)(seriesF, seriesG) =
+        Internal.div seriesF seriesG
+
+    static member inline Pow(series, n) =
+        Internal.pow n series
+
+module PowerSeries =
+
+    let inline ofList ns =
+        Internal.ofList ns
+
+    let inline toString series =
+        let rec loop level = function
+            | f :: _ when level = 0 ->
+                sprintf "%A, ..." f
+            | f :: fs ->
+                sprintf "%A, %s" f (fs.Value |> loop (level - 1))
+        series |> loop 3
+
+    let inline take<'T
+            when ^T : (static member Zero : ^T)
+            and ^T : (static member One : ^T)
+            and ^T : (static member (+) : ^T * ^T -> ^T)
+            and ^T : (static member (*) : ^T * ^T -> ^T)> n series =
+        let rec loop n (f : 'T :: fs) =
+            if n <= 0 then
+                []
+            else
+                List.Cons(f, fs.Value |> loop (n-1))
+        loop n series
+
     let inline compose seriesF seriesG =
         let rec loop (f : 'T :: fs) (g : 'T :: gs) =
             if g = GenericZero<'T> then
-                f :: lazy (mult gs.Value (loop fs.Value (g :: gs)))
+                f :: lazy (gs.Value * (loop fs.Value (g :: gs)))
             else
                 raise <| NotSupportedException()
         loop seriesF seriesG
@@ -130,7 +179,7 @@ module PowerSeries =
         let rec loop (f : 'T :: fs) =
             if f = GenericZero<'T> then
                 let rec rs =
-                    GenericZero<'T> :: lazy (div one (compose fs.Value rs))
+                    GenericZero<'T> :: lazy (PowerSeries.One / (compose fs.Value rs))
                 rs
             else
                 raise <| NotSupportedException()
@@ -151,51 +200,18 @@ module PowerSeries =
 
     let exp =
         let rec lazyExp =
-            lazy (add one<BigRational> (lazyIntegral lazyExp))
+            lazy (PowerSeries<BigRational>.One + (lazyIntegral lazyExp))
         lazyExp.Value
 
     let sin, cos =
         let rec lazySin =
             lazy (lazyIntegral lazyCos)
         and lazyCos =
-            lazy (sub one<BigRational> (lazyIntegral lazySin))
+            lazy (PowerSeries<BigRational>.One - (lazyIntegral lazySin))
         lazySin.Value, lazyCos.Value
 
-type PowerSeries<'T
-        when ^T : (static member Zero : ^T)
-        and ^T : (static member One : ^T)
-        and ^T : (static member (+) : ^T * ^T -> ^T)
-        and ^T : (static member (*) : ^T * ^T -> ^T)> with
-
-    static member inline Zero =
-        PowerSeries.zero<'T>
-
-    static member inline One =
-        PowerSeries.one<'T>
-
-    static member inline (~-) series =
-        PowerSeries.negate series
-
-    static member inline (+)(seriesF, seriesG) =
-        PowerSeries.add seriesF seriesG
-
-    static member inline (-)(seriesF, seriesG) =
-        PowerSeries.sub seriesF seriesG
-
-    static member inline (.*)(c, series) =
-        PowerSeries.scale c series
-
-    static member inline (*)(seriesF, seriesG) =
-        PowerSeries.mult seriesF seriesG
-
-    static member inline (/)(seriesF, seriesG) =
-        PowerSeries.div seriesF seriesG
-
-    static member inline Pow(series, n) =
-        PowerSeries.pow n series
-
 module NumericLiteralG =
-    let FromZero () = PowerSeries.zero<int>
-    let FromOne () = PowerSeries.one<int>
-    let FromInt32 (n : int) = PowerSeries.ofList [n]
-    let FromInt64 (n : int64) = PowerSeries.ofList [n]
+    let FromZero () = Internal.zero<int>
+    let FromOne () = Internal.one<int>
+    let FromInt32 (n : int) = Internal.constant n
+    let FromInt64 (n : int64) = Internal.constant n

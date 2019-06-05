@@ -7,7 +7,7 @@ open MathNet.Numerics
 [<TestClass>]
 type UnitTest() =
 
-    let x = PowerSeries.x
+    let x = PowerSeries.X
 
     [<TestMethod>]
     member __.Types() =
