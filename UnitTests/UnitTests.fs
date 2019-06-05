@@ -1,7 +1,10 @@
 ﻿namespace Bernsrite.PowerSeries
 
+open System
 open System.Numerics
+
 open Microsoft.VisualStudio.TestTools.UnitTesting
+
 open MathNet.Numerics
 
 [<TestClass>]
@@ -91,6 +94,11 @@ type UnitTest() =
         Assert.AreEqual(
             [1N; 1N; 1N/2N; 1N/6N; 1N/24N; 1N/120N; 1N/720N],
             PowerSeries.exp |> PowerSeries.take 7)
+        Assert.AreEqual(
+            Math.E,
+            PowerSeries.exp
+                |> PowerSeries.eval 100 1N
+                |> float)
 
     [<TestMethod>]
     member __.Trig() =
