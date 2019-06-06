@@ -42,3 +42,28 @@ We can then construct power series algebraically by implementing basic arithmeti
 ```F#
 let series = (1 - 2*x**2) ** 3   // first 10 coefficients are 1, 0, -6, 0, 12, 0, -8, 0, 0, 0
 ```
+
+## Trigonometry, calculus, and more
+
+With that foundation in place, we can implement some truly remarkable behavior, such as integration of power series:
+
+```F#
+let lazyIntegral (fs : Lazy<_>) =
+    let rec int1 (g : 'T :: gs) n : PowerSeries<'T> =
+        (g / n) :: lazy (int1 gs.Value (n + GenericOne<'T>))
+    GenericZero<'T> :: lazy (int1 fs.Value GenericOne<'T>)
+    
+/// Answers the integral of the given power series.
+let integral series =
+    lazyIntegral (lazy series)
+```
+
+Note that `lazyIntegral` generates a zero before it attempts to evaluate its argument. This allows for usages that are close to magical, such as the exponential function, `exp x`:
+
+```F#
+/// Exponential function.
+let exp =
+    let rec lazyExp =
+        lazy (PowerSeries<BigRational>.One + (lazyIntegral lazyExp))
+    lazyExp.Value
+```
