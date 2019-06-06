@@ -23,7 +23,7 @@ let rec ones = 1 :: lazy ones   // generates warning FS0040: "This and other rec
 
 This technique pushes F# to its limits in some ways (hence the compiler warning), but can successfully represent power series in F#.
 
-## Examples
+## Example series
 
 A power series whose coefficients are all zero has the value zero (i.e. `0 + 0*x + 0*x**2 + 0*x**3 + ...`). We implement this series using `GenericZero` so the actual type of the coefficients can be `int`, `BigRational` (from `System.Numerics`), or any other numeric type that we choose.
 
@@ -40,10 +40,10 @@ let rec x = GenericZero<'T> :: lazy (GenericOne<'T> :: lazy zero)
 We can then construct power series algebraically by implementing basic arithmetic operations on power series. For example, the following expression uses subtraction, multiplication, and exponentiation to construct a power series:
 
 ```F#
-let series = (1 - 2*x**2) ** 3   // first 10 coefficients are 1, 0, -6, 0, 12, 0, -8, 0, 0, 0
+let series = (1 - 2*x**2) ** 3   // first ten coefficients are 1, 0, -6, 0, 12, 0, -8, 0, 0, 0
 ```
 
-## Trigonometry, calculus, and more
+## Power serious
 
 With that foundation in place, we can implement some truly remarkable behavior, such as integration of power series:
 
@@ -58,12 +58,22 @@ let integral series =
     lazyIntegral (lazy series)
 ```
 
-Note that `lazyIntegral` generates a zero before it attempts to evaluate its argument. This allows for usages that are close to magical, such as the exponential function, `exp x`:
+Note that `lazyIntegral` generates a zero before it attempts to evaluate its argument. This allows for self-referential usages that are close to magical, such as the exponential function, `exp x`:
 
 ```F#
-/// Exponential function.
+/// Exponential function: exp = 1 + (integral exp)
 let exp =
     let rec lazyExp =
         lazy (PowerSeries<BigRational>.One + (lazyIntegral lazyExp))
     lazyExp.Value
+```
+
+The coefficients of this series are rational numbers: 1, 1, 1/2, 1/6, 1/24, 1/120, 1/720, etc. We can then take, say, the first 100 coefficients, evaluate them for x = 1, and convert the resulting sum to a `float`, giving a value that matches Math.E exactly:
+
+```F#
+Assert.AreEqual(
+        Math.E,
+        PowerSeries.exp
+            |> PowerSeries.eval 100 1N
+            |> float)
 ```
