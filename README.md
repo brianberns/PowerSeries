@@ -77,3 +77,7 @@ Assert.AreEqual(
             |> PowerSeries.eval 100 1N
             |> float)
 ```
+
+## Usage
+
+The power series type is `PowerSeries<'T>`. Working examples, including square roots, trigonometry, and calculus can be found in the [unit tests](https://github.com/brianberns/Bernsrite.PowerSeries/blob/master/UnitTests/UnitTests.fs).
