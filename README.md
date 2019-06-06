@@ -68,7 +68,7 @@ let exp =
     lazyExp.Value
 ```
 
-The coefficients of this series are rational numbers: 1, 1, 1/2, 1/6, 1/24, 1/120, 1/720, etc. We can then take, say, the first 100 coefficients, evaluate them for x = 1, and convert the resulting sum to a `float`, giving a value that matches Math.E exactly:
+The coefficients of this series are rational numbers: 1, 1, 1/2, 1/6, 1/24, 1/120, 1/720, etc. We can then take, say, the first 100 coefficients, evaluate them for x = 1, and convert the resulting sum to a `float`, giving a value that matches `Math.E` exactly:
 
 ```F#
 Assert.AreEqual(
