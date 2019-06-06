@@ -1,6 +1,6 @@
 # Power series, power serious
 
-A power series is characterized by an infinite list of coefficients: a<sub>0</sub> + a<sub>1</sub>*x + a<sub>2</sub>*x<sup>2</sup> + a<sub>3</sub>*x<sup>3</sup> + ... . For example, the power seres for `cos x` is 1 - x<sup>2</sup>/2! + x<sup>4</sup>/4! - x<sup>6</sup>/6! + ... and the coefficients for the powers of x in this series are 1, 0, -1/2, 0, 1/24, ...
+A power series is characterized by an infinite list of coefficients: a<sub>0</sub> + a<sub>1</sub>*x + a<sub>2</sub>*x<sup>2</sup> + a<sub>3</sub>*x<sup>3</sup> + ... . For example, the power series for `cos x` is 1 - x<sup>2</sup>/2! + x<sup>4</sup>/4! - x<sup>6</sup>/6! + ... and the coefficients for the powers of x in this series are 1, 0, -1/2, 0, 1/24, ...
 
 This F# class library models the coefficients of a power series as an infinite, lazy list. The idea comes from a functional pearl by M. Douglas McIlroy called [Power Series, Power Serious](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.333.3156&rep=rep1&type=pdf).
 
