@@ -32,7 +32,7 @@ let rec zero = GenericZero<'T> :: lazy zero
 Similarly, we can represent the term `x` (i.e. `0 + 1*x`) with the coefficient 0, followed by 1, followed by an infinite list of zeros:
 
 ```F#
-let rec x = GenericZero<'T> :: lazy (GenericOne<'T> :: lazy zero)
+let x = GenericZero<'T> :: lazy (GenericOne<'T> :: lazy zero)
 ```
 
 We can then construct power series algebraically by implementing basic arithmetic operations on power series. For example, the following expression uses subtraction, multiplication, and exponentiation to construct a power series:
