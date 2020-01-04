@@ -45,6 +45,13 @@ A power series whose coefficients are all zero has the value zero (i.e. `0 + 0x 
 let rec zero = GenericZero<'T> :: lazy zero
 ```
 
+In the same way, we can represent any constant (e.g. `0`, `1`, `2`, ...) as a power series. For example, the number one is defined as this series:
+
+```fsharp
+// 1, 0, 0, ... = 1
+let rec one = GenericOne<'T> :: lazy zero
+```
+
 Similarly, we represent the term `x` (i.e. `0 + 1x`) as the coefficient `0`, followed by `1`, followed by an infinite list of zeros:
 
 ```fsharp
@@ -52,14 +59,40 @@ Similarly, we represent the term `x` (i.e. `0 + 1x`) as the coefficient `0`, fol
 let x = GenericZero<'T> :: lazy (GenericOne<'T> :: lazy zero)
 ```
 
-This gives us the ability to represent constants (e.g. `0`) and variables (e.g. `x`) as power series. We can then construct power series algebraically by implementing basic arithmetic operations on them. For example, the following expression uses subtraction, multiplication, and exponentiation of power series to construct an arbitrary polynomial:
+
+## Power serious
+
+The actual `PowerSeries` type is defined just like `InfiniteLazyList`, but with elements constrained to be numeric (which is painful in F#, but still doable):
+
+```fsharp
+/// A power series: a0 + a1*x + a2*x^2 + a3*x^3 + ...
+type PowerSeries<'T
+        when ^T : (static member Zero : ^T)
+        and ^T : (static member One : ^T)
+        and ^T : (static member (+) : ^T * ^T -> ^T)
+        and ^T : (static member (*) : ^T * ^T -> ^T)
+        and ^T : (static member (/) : ^T * ^T -> ^T)
+        and ^T : (static member (~-) : ^T -> ^T)
+        and ^T : equality> =
+    | (::) of ('T * Lazy<PowerSeries<'T>>)
+```
+
+Addition of power series is performed by adding corresponding coefficients together recursively:
+
+```fsharp
+/// Adds the given power series.
+let inline add seriesF seriesG =
+    let rec loop (f : 'T :: fs) (g : 'T :: gs) =
+        (f + g) :: lazy (loop fs.Value gs.Value)
+    loop seriesF seriesG
+```
+
+Subtraction, multiplication, and exponentiation of power series are defined similarly. (See McIlroy's paper for the math, which is fairly straightforwad.) With those operations in place, we can construct power series algebraically. For example, the following expression represents the arbitrary polynomial `(1 - 2x²)³`:
 
 ```fsharp
 // (1 - 2x²)³ = 1 - 6x² + 12x⁴ - 8x⁶
-let series = (1 - 2*x**2) ** 3   // coefficients are 1, 0, -6, 0, 12, 0, -8, 0, 0, 0, ...
+let polynomial = (1 - 2*x**2) ** 3   // coefficients are 1, 0, -6, 0, 12, 0, -8, 0, 0, 0, ...
 ```
-
-## Power serious
 
 With that foundation in place, we can implement even more sophisticated behavior, such as derivatives and integrals of power series:
 
@@ -96,4 +129,4 @@ Assert.AreEqual(
 
 ## Usage
 
-Many such computations are possible using this library. The power series type is `PowerSeries<'T>`, with a corresponding module of functions that's also called `PowerSeries`. Working examples, including square roots, trigonometry, and calculus can be found in the [unit tests](https://github.com/brianberns/Bernsrite.PowerSeries/blob/master/UnitTests/UnitTests.fs).
+Many such computations are possible using this library. Working examples, including square roots, trigonometry, and calculus can be found in the [unit tests](https://github.com/brianberns/Bernsrite.PowerSeries/blob/master/UnitTests/UnitTests.fs).
