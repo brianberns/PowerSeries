@@ -59,7 +59,6 @@ Similarly, we represent the term `x` (i.e. `0 + 1x`) as the coefficient `0`, fol
 let x = GenericZero<'T> :: lazy (GenericOne<'T> :: lazy zero)
 ```
 
-
 ## Power serious
 
 The actual `PowerSeries` type is defined just like `InfiniteLazyList`, but with elements constrained to be numeric (which is painful in F#, but still doable):
