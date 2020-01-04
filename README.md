@@ -41,12 +41,14 @@ This technique pushes F# to its limits in some ways (hence the compiler warning)
 A power series whose coefficients are all zero has the value zero (i.e. `0 + 0x + 0x² + 0x³ + ... = 0 + 0 + 0 + ... = 0`). We implement this series using `GenericZero` so the actual type of the coefficients can be `int`, `BigRational` (from `System.Numerics`), or any other numeric type that we choose.
 
 ```fsharp
+// 0, 0, 0, ...
 let rec zero = GenericZero<'T> :: lazy zero
 ```
 
 Similarly, we can represent the term `x` (i.e. `0 + 1x`) with the coefficient 0, followed by 1, followed by an infinite list of zeros:
 
 ```fsharp
+// 0, 1, 0, 0, 0, ... = 0 + 1x = x
 let x = GenericZero<'T> :: lazy (GenericOne<'T> :: lazy zero)
 ```
 
