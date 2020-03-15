@@ -86,7 +86,7 @@ let inline add seriesF seriesG =
     loop seriesF seriesG
 ```
 
-Subtraction, multiplication, and exponentiation of power series are defined similarly. (See McIlroy's paper for the math, which is fairly straightforwad.) With those operations in place, we can construct power series algebraically. For example, the following expression represents the arbitrary polynomial `(1 - 2x²)³`:
+Subtraction, multiplication, and exponentiation of power series are defined similarly. (See McIlroy's paper for the math, which is fairly straightforward.) With those operations in place, we can construct power series algebraically. For example, the following expression represents the arbitrary polynomial `(1 - 2x²)³`:
 
 ```fsharp
 // (1 - 2x²)³ = 1 - 6x² + 12x⁴ - 8x⁶
