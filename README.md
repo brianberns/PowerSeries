@@ -140,4 +140,4 @@ let sin, cos =
 
 ## Usage
 
-Many such computations are possible using this library. Working examples, including square roots, trigonometry, and calculus can be found in the [unit tests](https://github.com/brianberns/Bernsrite.PowerSeries/blob/master/UnitTests/UnitTests.fs).
+Many such computations are possible using this library. Working examples, including square roots, trigonometry, and calculus can be found in the [unit tests](https://github.com/brianberns/PowerSeries/blob/master/UnitTests/UnitTests.fs).

@@ -1,6 +1,6 @@
 /// Inspired by "Power Series, Power Serious" by M. Douglas McIlroy
 /// http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.333.3156&rep=rep1&type=pdf
-namespace Bernsrite.PowerSeries
+namespace PowerSeries
 
 open System
 open Microsoft.FSharp.Core.LanguagePrimitives

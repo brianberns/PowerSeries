@@ -1,4 +1,4 @@
-﻿namespace Bernsrite.PowerSeries
+﻿namespace PowerSeries
 
 open System
 open System.Numerics
