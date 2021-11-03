@@ -23,7 +23,7 @@ type PowerSeries<'T
         and ^T : (static member (/) : ^T * ^T -> ^T)
         and ^T : (static member (~-) : ^T -> ^T)
         and ^T : equality> =
-    | (::) of ('T * Lazy<PowerSeries<'T>>)
+    | (::) of 'T * Lazy<PowerSeries<'T>>
 
 module internal Internal =
 
@@ -61,7 +61,7 @@ module internal Internal =
             and ^T : equality> =
         constant GenericOne<'T>
 
-    /// 0 + 1*x
+    /// Power serious for a variable x = 0 + 1*x.
     let inline x<'T
             when ^T : (static member Zero : ^T)
             and ^T : (static member One : ^T)
@@ -70,7 +70,7 @@ module internal Internal =
             and ^T : (static member (/) : ^T * ^T -> ^T)
             and ^T : (static member (~-) : ^T -> ^T)
             and ^T : equality> =
-        GenericZero<'T> :: lazy (GenericOne<'T> :: lazy zero)
+        GenericZero<'T> :: lazy one
 
     /// Constructs a power series from the given coeffecients.
     let inline ofList<'T
@@ -88,15 +88,15 @@ module internal Internal =
 
     /// Negates the given power series.
     let inline negate series =
-        let rec loop = function
-            | f :: fs -> -f :: lazy (loop fs.Value)
-        series |> loop
+        let rec loop (f :: fs) =
+            -f :: lazy (loop fs.Value)
+        loop series
 
     /// Scales the given power series by a constant.
     let inline scale (c : 'T) series =
         let rec loop (f :: fs) =
-            (c * f) :: lazy (fs.Value |> loop)
-        series |> loop
+            (c * f) :: lazy (loop fs.Value)
+        loop series
 
     /// Adds the given power series.
     let inline add seriesF seriesG =
