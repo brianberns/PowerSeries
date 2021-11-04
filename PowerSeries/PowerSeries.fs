@@ -269,13 +269,20 @@ module PowerSeries =
             if n <= 0 then
                 GenericZero<'T>
             else
-                f + (Internal.scale x fs.Value |> loop (n - 1))
-        series |> loop n
+                f + (fs.Value |> Internal.scale x |> loop (n - 1))
+        loop n series
 
     /// Exponential function.
-    let exp =
+    let inline exp<'T
+            when ^T : (static member Zero : ^T)
+            and ^T : (static member One : ^T)
+            and ^T : (static member (+) : ^T * ^T -> ^T)
+            and ^T : (static member (*) : ^T * ^T -> ^T)
+            and ^T : (static member (/) : ^T * ^T -> ^T)
+            and ^T : (static member (~-) : ^T -> ^T)
+            and ^T : equality> =
         let rec lazyExp =
-            lazy (PowerSeries<BigRational>.One + (lazyIntegral lazyExp))
+            lazy (PowerSeries<'T>.One + (lazyIntegral lazyExp))
         lazyExp.Value
 
     /// Sine and cosine functions.

@@ -76,10 +76,14 @@ type UnitTest() =
         let expected = [1N; 1N; 1N/2N; 1N/6N; 1N/24N; 1N/120N; 1N/720N]
         Assert.AreEqual(
             expected,
-            PowerSeries.exp |> PowerSeries.take expected.Length)
+            PowerSeries.exp<BigRational> |> PowerSeries.take expected.Length)
         Assert.AreEqual(
             Math.E,
-            PowerSeries.exp
+            PowerSeries.exp<float>
+                |> PowerSeries.eval 100 1.0)
+        Assert.AreEqual(
+            Math.E,
+            PowerSeries.exp<BigRational>
                 |> PowerSeries.eval 100 1N
                 |> float)
 
