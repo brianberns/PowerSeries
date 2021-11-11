@@ -154,6 +154,10 @@ type PowerSeries<'T
     static member inline One =
         Internal.one<'T>
 
+    /// Creates a power series for the given value.
+    static member inline OfValue(value : 'T) =
+        Internal.constant(value)
+
     /// 0 + 1*x
     static member inline X =
         Internal.x<'T>
@@ -170,7 +174,7 @@ type PowerSeries<'T
     static member inline (+)(value : 'T, series : PowerSeries<'T>) =
         (Internal.constant value) + series
 
-    /// Subtracts the given power series from the given constant value.
+    /// Subtracts one given power series from the other.
     static member inline (-)(seriesF : PowerSeries<'T>, seriesG : PowerSeries<'T>) =
         Internal.sub seriesF seriesG
 
