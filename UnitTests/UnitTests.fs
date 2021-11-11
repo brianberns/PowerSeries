@@ -108,10 +108,17 @@ type UnitTest() =
     /// https://www.emathzone.com/tutorials/calculus/maclaurin-series-of-sqrt1x.html
     [<TestMethod>]
     member __.Sqrt() =
-        let x = PowerSeries<BigRational>.X
+        let sqrt1PlusX =
+            1N + PowerSeries<BigRational>.X
+                |> PowerSeries.sqrt
         let expected = [1N; 1N/2N; -1N/8N; 1N/16N]
         Assert.AreEqual(
             expected,
-            (1N + x)
-                |> PowerSeries.sqrt
+            sqrt1PlusX
                 |> PowerSeries.take expected.Length)
+        Assert.AreEqual(
+            sqrt 2.0,
+            sqrt1PlusX
+                |> PowerSeries.eval 200 1N
+                |> float,
+            0.0001)
