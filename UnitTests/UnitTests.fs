@@ -76,14 +76,14 @@ type UnitTest() =
         let expected = [1N; 1N; 1N/2N; 1N/6N; 1N/24N; 1N/120N; 1N/720N]
         Assert.AreEqual(
             expected,
-            PowerSeries.exp<BigRational>.Take(expected.Length))
+            PowerSeries<BigRational>.Exp.Take(expected.Length))
         Assert.AreEqual(
             Math.E,
-            PowerSeries.exp<float>
+            PowerSeries<float>.Exp
                 |> PowerSeries.eval 100 1.0)
         Assert.AreEqual(
             Math.E,
-            PowerSeries.exp<BigRational>
+            PowerSeries<BigRational>.Exp
                 |> PowerSeries.eval 100 1N
                 |> float)
 
@@ -97,7 +97,7 @@ type UnitTest() =
 
         test
             PowerSeries.sin
-            (PowerSeries.sqrt (1N - PowerSeries.cos ** 2))
+            (sqrt (1N - PowerSeries.cos ** 2))
 
         let x = PowerSeries<BigRational>.X
         test

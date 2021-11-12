@@ -140,7 +140,7 @@ module PowerSeries =
     /// Composes two power series: F(G).
     let inline compose seriesF seriesG =
         let rec loop (f :: fs) (g :: gs) =
-            if g = GenericZero<'T> then
+            if g = GenericZero then
                 f :: lazy (gs.Value * loop fs.Value (g :: gs))
             else
                 raise <| NotSupportedException()
@@ -149,9 +149,9 @@ module PowerSeries =
     /// Reverts the given power series. (Finds its inverse.)
     let inline revert series =
         let rec loop (f :: fs) =
-            if f = GenericZero<'T> then
+            if f = GenericZero then
                 let rec rs =
-                    GenericZero<'T> :: lazy (PowerSeries.One / (compose fs.Value rs))
+                    GenericZero :: lazy (PowerSeries.One / compose fs.Value rs)
                 rs
             else
                 raise <| NotSupportedException()
@@ -164,7 +164,7 @@ module PowerSeries =
         deriv1 fs.Value GenericOne<'T>
 
     /// Answers the integral of the given power series.
-    let inline private lazyIntegral (fs : Lazy<_>) =
+    let inline internal lazyIntegral (fs : Lazy<_>) =
         let rec int1 (g : 'T :: gs) n =
             (g / n) :: lazy (int1 gs.Value (n + GenericOne<'T>))
         GenericZero<'T> :: lazy (int1 fs.Value GenericOne<'T>)
@@ -183,19 +183,6 @@ module PowerSeries =
                 f + (x * fs.Value |> loop (n - 1))
         loop n series
 
-    /// Exponential function.
-    let inline exp<'T
-            when ^T : (static member Zero : ^T)
-            and ^T : (static member One : ^T)
-            and ^T : (static member (+) : ^T * ^T -> ^T)
-            and ^T : (static member (*) : ^T * ^T -> ^T)
-            and ^T : (static member (/) : ^T * ^T -> ^T)
-            and ^T : (static member (~-) : ^T -> ^T)
-            and ^T : equality> =
-        let rec lazyExp =
-            lazy (PowerSeries<'T>.One + (lazyIntegral lazyExp))
-        lazyExp.Value
-
     /// Sine and cosine functions.
     let sin, cos =
         let rec lazySin =
@@ -207,34 +194,6 @@ module PowerSeries =
     /// Tangent function.
     let tan = sin / cos
 
-    /// Answers the square root of the given series.
-    let inline sqrt<'T
-            when ^T : (static member Zero : ^T)
-            and ^T : (static member One : ^T)
-            and ^T : (static member (+) : ^T * ^T -> ^T)
-            and ^T : (static member (*) : ^T * ^T -> ^T)
-            and ^T : (static member (/) : ^T * ^T -> ^T)
-            and ^T : (static member (~-) : ^T -> ^T)
-            and ^T : equality> series =
-        let fail () = failwith "Can't compute square root"
-        let rec loop (f : 'T :: fs) =
-            if f = GenericZero<'T> then
-                let (f :: fs) = fs.Value
-                if f = GenericZero<'T> then
-                    f :: lazy (loop fs.Value)
-                else fail ()
-            elif f = GenericOne<'T> then
-                let rec lazyQs : Lazy<PowerSeries<'T>> =
-                    let lazyDiv =
-                        let num = deriv (GenericOne<'T> :: fs)
-                        let lazyDen =
-                            lazy (lazyQs.Value + lazyQs.Value)
-                        lazy (num / lazyDen.Value)
-                    lazy (PowerSeries<'T>.One + lazyIntegral lazyDiv)
-                lazyQs.Value
-            else fail ()
-        series |> loop
-
 /// Power series extensions.
 type PowerSeries<'T
         when ^T : (static member Zero : ^T)
@@ -245,6 +204,29 @@ type PowerSeries<'T
         and ^T : (static member (~-) : ^T -> ^T)
         and ^T : equality> with
 
+    /// Exponential function.
+    static member inline Exp =
+        let rec lazyExp =
+            lazy (PowerSeries<'T>.One + (PowerSeries.lazyIntegral lazyExp))
+        lazyExp.Value
+
     /// Answers the square root of the given series.
     static member inline Sqrt(series) =
-        PowerSeries.sqrt series
+        let fail () = failwith "Can't compute square root"
+        let rec loop (f : 'T :: fs) =
+            if f = GenericZero<'T> then
+                let (f :: fs) = fs.Value
+                if f = GenericZero<'T> then
+                    f :: lazy (loop fs.Value)
+                else fail ()
+            elif f = GenericOne<'T> then
+                let rec lazyQs : Lazy<PowerSeries<'T>> =
+                    let lazyDiv =
+                        let num = PowerSeries.deriv (GenericOne<'T> :: fs)
+                        let lazyDen =
+                            lazy (lazyQs.Value + lazyQs.Value)
+                        lazy (num / lazyDen.Value)
+                    lazy (PowerSeries<'T>.One + PowerSeries.lazyIntegral lazyDiv)
+                lazyQs.Value
+            else fail ()
+        series |> loop
