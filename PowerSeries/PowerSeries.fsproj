@@ -12,14 +12,6 @@
     <RepositoryUrl>https://github.com/brianberns/PowerSeries</RepositoryUrl>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>40</NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>40</NoWarn>
-  </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="PowerSeries.fs" />
   </ItemGroup>
