@@ -36,7 +36,7 @@ module internal Internal =
             and ^T : (static member (/) : ^T * ^T -> ^T)
             and ^T : (static member (~-) : ^T -> ^T)
             and ^T : equality> =
-        let rec value =  GenericZero<'T> :: lazy value
+        let rec value = GenericZero<'T> :: lazy value
         value
 
     /// Power series for a constant.
