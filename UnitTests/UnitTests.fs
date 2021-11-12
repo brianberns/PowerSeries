@@ -108,8 +108,7 @@ type UnitTest() =
     [<TestMethod>]
     member __.Sqrt() =
         let sqrt1PlusX =
-            1N + PowerSeries<BigRational>.X
-                |> PowerSeries.sqrt
+            sqrt (1N + PowerSeries<BigRational>.X)
         let expected = [1N; 1N/2N; -1N/8N; 1N/16N]
         Assert.AreEqual(
             expected,

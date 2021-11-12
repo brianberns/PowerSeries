@@ -16,6 +16,7 @@ module List =
 
 #nowarn "40"   // recursive values
 #nowarn "77"   // F# compiler bug workaround
+#nowarn "193"   // more SRTP bugginess
 
 /// A power series: a0 + a1*x + a2*x^2 + a3*x^3 + ...
 type PowerSeries<'T
@@ -34,7 +35,7 @@ type PowerSeries<'T
         value
 
     /// Power series for a constant.
-    static member inline Constant(c : 'T) =
+    static member inline Constant(c) =
         c :: lazy PowerSeries<'T>.Zero
 
     /// Power series for 1.
@@ -62,12 +63,12 @@ type PowerSeries<'T
     static member inline (+)(seriesF, seriesG) =
         let (.+) a b =
             (^T : (static member (+) : ^T * ^T -> ^T)(a, b))   // F# compiler bug workaround
-        let rec loop (f : 'T :: fs) (g : 'T :: gs) =
+        let rec loop (f :: fs) (g :: gs) =
             (f .+ g) :: lazy (loop fs.Value gs.Value)
         loop seriesF seriesG
 
     /// Adds the given constant value to the given power series.
-    static member inline (+)(value : 'T, series) =
+    static member inline (+)(value, series) =
         PowerSeries.Constant(value) + series
 
     /// Subtracts the given power series.
@@ -79,7 +80,7 @@ type PowerSeries<'T
         PowerSeries.Constant(value) - series
 
     /// Multiplies the given power series by a constant.
-    static member inline (*)(c : 'T, series) =
+    static member inline (*)(c, series) =
         let (.*) a b =
             (^T : (static member (*) : ^T * ^T -> ^T)(a, b))   // F# compiler bug workaround
         let rec loop (f :: fs) =
@@ -90,22 +91,22 @@ type PowerSeries<'T
     static member inline (*)(seriesF, seriesG) =
         let (.*) a b =
             (^T : (static member (*) : ^T * ^T -> ^T)(a, b))   // F# compiler bug workaround
-        let rec loop (f : 'T :: fs) (g : 'T :: gs) =
-            (f .* g) :: lazy ((f * gs.Value) + (loop fs.Value (g :: gs)))
+        let rec loop (f :: fs) (g :: gs) =
+            (f .* g) :: lazy (f * gs.Value + loop fs.Value (g :: gs))
         loop seriesF seriesG
 
     /// Divides the given power series.
     static member inline (/)(seriesF, seriesG) =
-        let rec loop (f : 'T :: fs) (g : 'T :: gs) =
+        let rec loop (f :: fs) (g :: gs) =
             if f = GenericZero<'T> && g = GenericZero<'T> then
                 loop fs.Value gs.Value
             else
                 let q = f / g
-                q :: lazy (loop (fs.Value - (q * gs.Value)) (g :: gs))
+                q :: lazy (loop (fs.Value - q * gs.Value) (g :: gs))
         loop seriesF seriesG
 
     /// Divides the given constant value by the given power series.
-    static member inline (/)(value : 'T, series) =
+    static member inline (/)(value, series) =
         PowerSeries.Constant(value) / series
 
     /// Raises the given power series to a power.
@@ -122,7 +123,7 @@ type PowerSeries<'T
 
     /// Takes a finite number of coeffecients from the given power series.
     member inline series.Take(n) =
-        let rec loop n (f : 'T :: fs) =
+        let rec loop n (f :: fs) =
             if n <= 0 then
                 []
             else
@@ -138,16 +139,16 @@ module PowerSeries =
 
     /// Composes two power series: F(G).
     let inline compose seriesF seriesG =
-        let rec loop (f : 'T :: fs) (g : 'T :: gs) =
+        let rec loop (f :: fs) (g :: gs) =
             if g = GenericZero<'T> then
-                f :: lazy (gs.Value * (loop fs.Value (g :: gs)))
+                f :: lazy (gs.Value * loop fs.Value (g :: gs))
             else
                 raise <| NotSupportedException()
         loop seriesF seriesG
     
     /// Reverts the given power series. (Finds its inverse.)
     let inline revert series =
-        let rec loop (f : 'T :: fs) =
+        let rec loop (f :: fs) =
             if f = GenericZero<'T> then
                 let rec rs =
                     GenericZero<'T> :: lazy (PowerSeries.One / (compose fs.Value rs))
@@ -233,3 +234,17 @@ module PowerSeries =
                 lazyQs.Value
             else fail ()
         series |> loop
+
+/// Power series extensions.
+type PowerSeries<'T
+        when ^T : (static member Zero : ^T)
+        and ^T : (static member One : ^T)
+        and ^T : (static member (+) : ^T * ^T -> ^T)
+        and ^T : (static member (*) : ^T * ^T -> ^T)
+        and ^T : (static member (/) : ^T * ^T -> ^T)
+        and ^T : (static member (~-) : ^T -> ^T)
+        and ^T : equality> with
+
+    /// Answers the square root of the given series.
+    static member inline Sqrt(series) =
+        PowerSeries.sqrt series
