@@ -59,7 +59,7 @@ type PowerSeries<'T when Numeric<'T>> =
 
     /// Negates the given power series.
     static member inline (~-)(series) =
-        let rec loop (f :: fs) =
+        let rec loop (f : 'T :: fs) =
             -f :: lazy (loop fs.Value)
         loop series
 
@@ -74,7 +74,7 @@ type PowerSeries<'T when Numeric<'T>> =
         PowerSeries.Constant(value) + series
 
     /// Subtracts the given power series.
-    static member inline (-)(seriesF, seriesG) =
+    static member inline (-)(seriesF : PowerSeries<'T>, seriesG) =
         seriesF + (-seriesG)
 
     /// Subtracts the given power series from the given constant value.
@@ -108,11 +108,11 @@ type PowerSeries<'T when Numeric<'T>> =
         loop seriesF seriesG
 
     /// Divides the given constant value by the given power series.
-    static member inline (/)(value, series) =
+    static member inline (/)(value : 'T, series) =
         PowerSeries.Constant(value) / series
 
     /// Raises the given power series to a power.
-    static member inline Pow(series, n) =
+    static member inline Pow(series : PowerSeries<'T>, n) =
         pown series n
 
     /// Takes a finite number of coeffecients from the given power series.
