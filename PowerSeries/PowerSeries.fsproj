@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Version>0.7.0</Version>
     <Authors>Brian Berns</Authors>
     <Description>A power series is characterized by an infinite list of coefficients: a0 + (a1 * x) + (a2 * x^2) + (a3 * x^3) + ... . For example, the power seres for cos x is 1 - x2/2! + x4/4! - x6/6! + ... and the coefficients for the powers of x in this series are 1, 0, -1/2, 0, 1/24, ... . This F# class library models the coefficients of a power series as an infinite, lazy list. The idea comes from a functional pearl by M. Douglas McIlroy called Power Series, Power Serious.</Description>
@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
-    <PackageReference Include="MathNet.Numerics.FSharp" Version="4.15.0" />
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+    <PackageReference Include="MathNet.Numerics.FSharp" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,10 +26,6 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="6.0.1" />
   </ItemGroup>
 
 </Project>

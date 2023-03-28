@@ -1,5 +1,8 @@
-/// Inspired by "Power Series, Power Serious" by M. Douglas McIlroy
-/// http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.333.3156&rep=rep1&type=pdf
+(*
+ * Inspired by "Power Series, Power Serious" by M. Douglas McIlroy
+ * http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.333.3156&rep=rep1&type=pdf
+ *)
+
 namespace PowerSeries
 
 open System
@@ -15,18 +18,19 @@ module List =
         | head :: tail -> Cons(head, tail)
 
 #nowarn "40"   // recursive values
-#nowarn "77"   // F# compiler bug workaround
-#nowarn "193"   // more SRTP bugginess
+
+/// A generic number.
+type Numeric<'T
+    when 'T : (static member Zero : 'T)
+    and 'T : (static member One : 'T)
+    and 'T : (static member (+) : 'T * 'T -> 'T)
+    and 'T : (static member (*) : 'T * 'T -> 'T)
+    and 'T : (static member (/) : 'T * 'T -> 'T)
+    and 'T : (static member (~-) : 'T -> 'T)
+    and 'T : equality> = 'T
 
 /// A power series: a0 + a1*x + a2*x^2 + a3*x^3 + ...
-type PowerSeries<'T
-        when ^T : (static member Zero : ^T)
-        and ^T : (static member One : ^T)
-        and ^T : (static member (+) : ^T * ^T -> ^T)
-        and ^T : (static member (*) : ^T * ^T -> ^T)
-        and ^T : (static member (/) : ^T * ^T -> ^T)
-        and ^T : (static member (~-) : ^T -> ^T)
-        and ^T : equality> =
+type PowerSeries<'T when Numeric<'T>> =
     | (::) of 'T * Lazy<PowerSeries<'T>>
 
     /// Power series for 0.
@@ -60,49 +64,47 @@ type PowerSeries<'T
         loop series
 
     /// Adds the given power series.
-    static member inline (+)(seriesF, seriesG) =
-        let (.+) a b =
-            (^T : (static member (+) : ^T * ^T -> ^T)(a, b))   // F# compiler bug workaround
+    static member inline (+)(seriesF : PowerSeries<'T>, seriesG : PowerSeries<'T>) : PowerSeries<'T> =
         let rec loop (f :: fs) (g :: gs) =
-            (f .+ g) :: lazy (loop fs.Value gs.Value)
+            (f + g) :: lazy (loop fs.Value gs.Value)
         loop seriesF seriesG
 
     /// Adds the given constant value to the given power series.
-    static member inline (+)(value, series) =
+    static member inline (+)(value : 'T, series : PowerSeries<'T>) : PowerSeries<'T> =
         PowerSeries.Constant(value) + series
 
     /// Subtracts the given power series.
-    static member inline (-)(seriesF, seriesG) =
+    static member inline (-)(seriesF : PowerSeries<'T>, seriesG : PowerSeries<'T>) : PowerSeries<'T> =
         seriesF + (-seriesG)
 
     /// Subtracts the given power series from the given constant value.
-    static member inline (-)(value : 'T, series) =
+    static member inline (-)(value : 'T, series : PowerSeries<'T>) : PowerSeries<'T> =
         PowerSeries.Constant(value) - series
 
     /// Multiplies the given power series by a constant.
-    static member inline (*)(c, series) =
-        let (.*) a b =
-            (^T : (static member (*) : ^T * ^T -> ^T)(a, b))   // F# compiler bug workaround
+    static member inline (*)(c : 'T, series : PowerSeries<'T>) : PowerSeries<'T> =
         let rec loop (f :: fs) =
-            (c .* f) :: lazy (loop fs.Value)
+            (c * f) :: lazy (loop fs.Value)
         loop series
 
     /// Multiplies the given power series.
-    static member inline (*)(seriesF, seriesG) =
-        let (.*) a b =
-            (^T : (static member (*) : ^T * ^T -> ^T)(a, b))   // F# compiler bug workaround
+    static member inline (*)(seriesF : PowerSeries<'T>, seriesG : PowerSeries<'T>) : PowerSeries<'T> =
+        let (.*) (a : 'T) (b : PowerSeries<'T>) =
+            PowerSeries<'T>.(*)(a, b)
         let rec loop (f :: fs) (g :: gs) =
-            (f .* g) :: lazy (f * gs.Value + loop fs.Value (g :: gs))
+            (f * g) :: lazy (f .* gs.Value + loop fs.Value (g :: gs))
         loop seriesF seriesG
 
     /// Divides the given power series.
     static member inline (/)(seriesF, seriesG) =
+        let (.*) (a : 'T) (b : PowerSeries<'T>) =
+            PowerSeries<'T>.(*)(a, b)
         let rec loop (f :: fs) (g :: gs) =
             if f = GenericZero<'T> && g = GenericZero<'T> then
                 loop fs.Value gs.Value
             else
                 let q = f / g
-                q :: lazy (loop (fs.Value - q * gs.Value) (g :: gs))
+                q :: lazy (loop (fs.Value - q .* gs.Value) (g :: gs))
         loop seriesF seriesG
 
     /// Divides the given constant value by the given power series.
@@ -195,14 +197,7 @@ module PowerSeries =
     let tan = sin / cos
 
 /// Power series extensions.
-type PowerSeries<'T
-        when ^T : (static member Zero : ^T)
-        and ^T : (static member One : ^T)
-        and ^T : (static member (+) : ^T * ^T -> ^T)
-        and ^T : (static member (*) : ^T * ^T -> ^T)
-        and ^T : (static member (/) : ^T * ^T -> ^T)
-        and ^T : (static member (~-) : ^T -> ^T)
-        and ^T : equality> with
+type PowerSeries<'T when Numeric<'T>> with
 
     /// Exponential function.
     static member inline Exp =
