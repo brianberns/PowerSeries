@@ -64,40 +64,40 @@ type PowerSeries<'T when Numeric<'T>> =
         loop series
 
     /// Adds the given power series.
-    static member inline (+)(seriesF : PowerSeries<'T>, seriesG : PowerSeries<'T>) : PowerSeries<'T> =
+    static member inline (+)(seriesF, seriesG) =
         let rec loop (f :: fs) (g :: gs) =
             (f + g) :: lazy (loop fs.Value gs.Value)
         loop seriesF seriesG
 
     /// Adds the given constant value to the given power series.
-    static member inline (+)(value : 'T, series : PowerSeries<'T>) : PowerSeries<'T> =
+    static member inline (+)(value : 'T, series) =
         PowerSeries.Constant(value) + series
 
     /// Subtracts the given power series.
-    static member inline (-)(seriesF : PowerSeries<'T>, seriesG : PowerSeries<'T>) : PowerSeries<'T> =
+    static member inline (-)(seriesF, seriesG) =
         seriesF + (-seriesG)
 
     /// Subtracts the given power series from the given constant value.
-    static member inline (-)(value : 'T, series : PowerSeries<'T>) : PowerSeries<'T> =
+    static member inline (-)(value : 'T, series) =
         PowerSeries.Constant(value) - series
 
     /// Multiplies the given power series by a constant.
-    static member inline (*)(c : 'T, series : PowerSeries<'T>) : PowerSeries<'T> =
+    static member inline (*)(c : 'T, series) =
         let rec loop (f :: fs) =
             (c * f) :: lazy (loop fs.Value)
         loop series
 
     /// Multiplies the given power series.
-    static member inline (*)(seriesF : PowerSeries<'T>, seriesG : PowerSeries<'T>) : PowerSeries<'T> =
-        let (.*) (a : 'T) (b : PowerSeries<'T>) =
+    static member inline (*)(seriesF, seriesG) =
+        let (.*) (a : 'T) (b : PowerSeries<'T>) =   // F# compiler workaround
             PowerSeries<'T>.(*)(a, b)
-        let rec loop (f :: fs) (g :: gs) =
+        let rec loop (f : 'T :: fs) (g :: gs) =
             (f * g) :: lazy (f .* gs.Value + loop fs.Value (g :: gs))
         loop seriesF seriesG
 
     /// Divides the given power series.
     static member inline (/)(seriesF, seriesG) =
-        let (.*) (a : 'T) (b : PowerSeries<'T>) =
+        let (.*) (a : 'T) (b : PowerSeries<'T>) =   // F# compiler workaround
             PowerSeries<'T>.(*)(a, b)
         let rec loop (f :: fs) (g :: gs) =
             if f = GenericZero<'T> && g = GenericZero<'T> then
