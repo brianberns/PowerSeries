@@ -33,16 +33,16 @@ type Numeric<'T
 type PowerSeries<'T when Numeric<'T>> =
     | (::) of 'T * Lazy<PowerSeries<'T>>
 
-    /// Power series for 0.
+    /// Power series for 0 = 0 + 0*x + 0*x^2 + ...
     static member inline Zero =
         let rec value = GenericZero<'T> :: lazy value
         value
 
-    /// Power series for a constant.
+    /// Power series for a constant = a0 + 0*x + 0*x^2 + ...
     static member inline Constant(c) =
         c :: lazy PowerSeries<'T>.Zero
 
-    /// Power series for 1.
+    /// Power series for 1 = 1 + 0*x + 0*x^2 + ...
     static member inline One =
         PowerSeries.Constant(GenericOne<'T>)
 
@@ -113,15 +113,7 @@ type PowerSeries<'T when Numeric<'T>> =
 
     /// Raises the given power series to a power.
     static member inline Pow(series, n) =
-        let rec loop n series =
-            match n with
-                | 0 -> PowerSeries.One
-                | n when n > 0 ->
-                    series
-                        |> loop (n - 1)
-                        |> (*) series
-                | _ -> failwith "Negative exponents not supported"
-        series |> loop n
+        pown series n
 
     /// Takes a finite number of coeffecients from the given power series.
     member inline series.Take(n) =
