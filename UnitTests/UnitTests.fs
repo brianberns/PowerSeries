@@ -10,14 +10,7 @@ open MathNet.Numerics
 [<TestClass>]
 type UnitTest() =
 
-    member inline __.TypeTest<'T
-                        when ^T : (static member Zero : ^T)
-                        and ^T : (static member One : ^T)
-                        and ^T : (static member (+) : ^T * ^T -> ^T)
-                        and ^T : (static member (*) : ^T * ^T -> ^T)
-                        and ^T : (static member (/) : ^T * ^T -> ^T)
-                        and ^T : (static member (~-) : ^T -> ^T)
-                        and ^T : equality>(cast : int -> 'T) =
+    static member inline TypeTest(cast) =
 
         let coeff = [1; 0; -2]
         let expected = [1; 0; -6; 0; 12; 0; -8; 0; 0; 0]
@@ -31,15 +24,15 @@ type UnitTest() =
             (series ** 3).Take(expected.Length))
 
     [<TestMethod>]
-    member this.Types() =
-        this.TypeTest(id)
-        this.TypeTest(int64)
-        this.TypeTest(BigInteger)
-        this.TypeTest(decimal)
-        this.TypeTest(BigRational.FromInt)
+    member _.Types() =
+        UnitTest.TypeTest(id)
+        UnitTest.TypeTest(int64)
+        UnitTest.TypeTest(BigInteger)
+        UnitTest.TypeTest(decimal)
+        UnitTest.TypeTest(BigRational.FromInt)
 
     [<TestMethod>]
-    member __.Expression() =
+    member _.Expression() =
 
         let x = PowerSeries<int>.X
         let series = (1 - 2*x**2) ** 3
@@ -58,7 +51,7 @@ type UnitTest() =
             series.Take(10))
 
     [<TestMethod>]
-    member __.Calculus() =
+    member _.Calculus() =
  
         let x = PowerSeries<int>.X
         let series = x * x |> PowerSeries.deriv
@@ -72,7 +65,7 @@ type UnitTest() =
             series.Take(3))
 
     [<TestMethod>]
-    member __.Exp() =
+    member _.Exp() =
         let expected = [1N; 1N; 1N/2N; 1N/6N; 1N/24N; 1N/120N; 1N/720N]
         Assert.AreEqual(
             expected,
@@ -88,7 +81,7 @@ type UnitTest() =
                 |> float)
 
     [<TestMethod>]
-    member __.Trig() =
+    member _.Trig() =
 
         let test (seriesA : PowerSeries<_>) (seriesB : PowerSeries<_>) =
             Assert.AreEqual(
@@ -106,7 +99,7 @@ type UnitTest() =
 
     /// https://www.emathzone.com/tutorials/calculus/maclaurin-series-of-sqrt1x.html
     [<TestMethod>]
-    member __.Sqrt() =
+    member _.Sqrt() =
         let sqrt1PlusX =
             sqrt (1N + PowerSeries<BigRational>.X)
         let expected = [1N; 1N/2N; -1N/8N; 1N/16N]
