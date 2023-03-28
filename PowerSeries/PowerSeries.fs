@@ -91,7 +91,7 @@ type PowerSeries<'T when Numeric<'T>> =
     static member inline (*)(seriesF, seriesG) =
         let (.*) (a : 'T) (b : PowerSeries<'T>) =   // F# compiler workaround
             PowerSeries<'T>.(*)(a, b)
-        let rec loop (f : 'T :: fs) (g :: gs) =
+        let rec loop (f :: fs) (g :: gs) =
             (f * g) :: lazy (f .* gs.Value + loop fs.Value (g :: gs))
         loop seriesF seriesG
 
