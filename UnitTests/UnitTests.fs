@@ -70,11 +70,11 @@ type UnitTest() =
         Assert.AreEqual(
             expected,
             PowerSeries<BigRational>.Exp.Take(expected.Length))
-        Assert.AreEqual(
+        Assert.AreEqual<float>(
             Math.E,
             PowerSeries<float>.Exp
                 |> PowerSeries.eval 100 1.0)
-        Assert.AreEqual(
+        Assert.AreEqual<float>(
             Math.E,
             PowerSeries<BigRational>.Exp
                 |> PowerSeries.eval 100 1N
