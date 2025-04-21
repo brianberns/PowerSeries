@@ -1,6 +1,6 @@
 (*
  * Inspired by "Power Series, Power Serious" by M. Douglas McIlroy
- * http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.333.3156&rep=rep1&type=pdf
+ * https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=4666d43d39c890cfe88630eb93e39afe3110f930
  *)
 
 namespace PowerSeries
