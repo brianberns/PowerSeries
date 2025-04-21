@@ -16,7 +16,7 @@ For example, the power series for `cos x` is:
 
 As you can see, the coefficients for the powers of `x` in this series are `1`, `0`, `-1/2`, `0`, `1/24`, `0`, `-1/720`, ...
 
-Power series can be used to compute a remarkable variety of expressions. This F# class library models the coefficients of a power series as an infinite, lazy list. The idea comes from a functional pearl by M. Douglas McIlroy called [Power Series, Power Serious](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.333.3156&rep=rep1&type=pdf).
+Power series can be used to compute a remarkable variety of expressions. This F# class library models the coefficients of a power series as an infinite, lazy list. The idea comes from a functional pearl by M. Douglas McIlroy called [Power Series, Power Serious](https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=4666d43d39c890cfe88630eb93e39afe3110f930).
 
 ## Implementing infinite lists in F#
 
