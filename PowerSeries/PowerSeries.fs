@@ -199,7 +199,9 @@ type PowerSeries<'T when Numeric<'T>> with
 
     /// Answers the square root of the given series.
     static member inline Sqrt(series) =
+
         let fail () = failwith "Can't compute square root"
+
         let rec loop (f : 'T :: fs) =
             if f = GenericZero<'T> then
                 let (f :: fs) = fs.Value
@@ -216,4 +218,5 @@ type PowerSeries<'T when Numeric<'T>> with
                     lazy (PowerSeries<'T>.One + PowerSeries.lazyIntegral lazyDiv)
                 lazyQs.Value
             else fail ()
-        series |> loop
+
+        loop series
